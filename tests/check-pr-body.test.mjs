@@ -12,6 +12,10 @@ const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const scriptPath = join(repoRoot, 'scripts', 'check-pr-body.mjs');
 const templateText = readFileSync(join(repoRoot, 'pull_request_template.md'), 'utf8');
 const headings = templateText.split(/\r?\n/).filter(line => line.startsWith('## ')).map(line => line.slice(3));
+// The first placeholder row of the 確認 section (for example "- テスト:"), read from the template so the data follows its wording.
+const confirmLines = templateText.split(/\r?\n/);
+const confirmStart = confirmLines.indexOf('## 確認');
+const testRow = confirmLines.slice(confirmStart + 1).find(line => line.startsWith('- '));
 let api;
 let importError;
 try {
@@ -110,7 +114,7 @@ test('real content next to HTML comments fills a section', () => {
 });
 
 test('template placeholder rows with surrounding spaces do not fill confirmation', () => {
-  expectProblems(fullBody(new Map([['確認', '  - 試験:  \n\t- CI:\t\n']])), [{ heading: '確認', reason: 'empty' }]);
+  expectProblems(fullBody(new Map([['確認', `  ${testRow}  \n\t- CI:\t\n`]])), [{ heading: '確認', reason: 'empty' }]);
 });
 
 test('template placeholder rows do not fill impact', () => {
@@ -122,7 +126,7 @@ test('a bare template bullet does not fill changes', () => {
 });
 
 test('filled placeholder row counts as content', () => {
-  expectProblems(fullBody(new Map([['確認', '- 試験: 合成ケース9件\n- CI: 未実行']])), []);
+  expectProblems(fullBody(new Map([['確認', `${testRow} 合成ケース9件\n- CI: 未実行`]])), []);
 });
 
 test('placeholder filtering is specific to its template section', () => {
@@ -176,7 +180,7 @@ test('CLI rejects a missing heading and names it on standard error', () => {
 });
 
 test('CLI rejects an empty section and names it on standard error', () => {
-  const result = runCli({ pull_request: { body: fullBody(new Map([['確認', '<!-- 空 -->\n- 試験:\n- CI:']])) } });
+  const result = runCli({ pull_request: { body: fullBody(new Map([['確認', `<!-- 空 -->\n${testRow}\n- CI:`]])) } });
   assert.equal(result.status, 1);
   assert.match(result.stderr, /確認/);
 });
