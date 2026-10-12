@@ -212,3 +212,21 @@ test('CRLF untouched template body still has every section empty', () => {
   expectProblems(templateText.replaceAll('\n', '\r\n'),
     headings.map(heading => ({ heading, reason: 'empty' })));
 });
+
+// PR3-R001: a line with an info string (```js) inside a fenced block does not close the block.
+function headingsOnlyInsideOneBlock() {
+  return '```markdown\n```js\n' + headings.map(heading => section(heading)).join('\n') + '```\n';
+}
+
+test('headings inside one fenced block stay missing even after an inner ```js line', () => {
+  expectProblems(headingsOnlyInsideOneBlock(), headings.map(heading => ({ heading, reason: 'missing' })));
+});
+
+test('headings after a properly closed block still count', () => {
+  expectProblems('```markdown\n```js\n## 目的\n```\n' + fullBody(), []);
+});
+
+test('CLI rejects a body whose headings are all inside one fenced block', () => {
+  const result = runCli({ pull_request: { body: headingsOnlyInsideOneBlock() } });
+  assert.equal(result.status, 1);
+});

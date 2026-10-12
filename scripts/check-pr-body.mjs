@@ -18,7 +18,9 @@ function sections(text) {
     const trimmed = line.trim();
     const marker = /^(`{3,}|~{3,})/.exec(trimmed)?.[1];
     if (fence) {
-      if (marker && marker[0] === fence[0] && marker.length >= fence.length) fence = null;
+      // A closing fence is only the fence characters (CommonMark): ```js inside a block does not close it.
+      const closing = /^(`{3,}|~{3,})\s*$/.exec(trimmed)?.[1];
+      if (closing && closing[0] === fence[0] && closing.length >= fence.length) fence = null;
       if (current) current.push(line);
       continue;
     }
