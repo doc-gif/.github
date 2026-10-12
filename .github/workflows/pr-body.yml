@@ -1,4 +1,4 @@
-# Checks this repo's own PR bodies with the reusable check, using the PR's own checker and template.
+# Checks this repo's own PR bodies with the reusable check. github.sha is the PR merged into main, as checkout used before.
 # The PR can change both, so a pass is not a review; the review checks the body too.
 name: PR body
 
@@ -13,4 +13,4 @@ jobs:
   pr-body:
     uses: ./.github/workflows/check-pr-body.yml
     with:
-      ref: ${{ github.event.pull_request.head.sha }}
+      ref: ${{ github.sha }}
