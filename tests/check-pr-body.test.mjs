@@ -203,3 +203,12 @@ test('CLI rejects an unreadable event path', () => {
   const result = runCli(null, { missingFile: true });
   assert.notEqual(result.status, 0);
 });
+
+test('CRLF body with every required section filled passes', () => {
+  expectProblems(fullBody().replaceAll('\n', '\r\n'), []);
+});
+
+test('CRLF untouched template body still has every section empty', () => {
+  expectProblems(templateText.replaceAll('\n', '\r\n'),
+    headings.map(heading => ({ heading, reason: 'empty' })));
+});
