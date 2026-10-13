@@ -30,6 +30,6 @@
 
 ## マージの順
 
-<!-- 先にマージするPRがあるなら、このPRのbaseをそのPRのbranchにし（重ねたPR）、ここにも順番を書く。mainへ直接なら「mainへ直接」。 -->
+<!-- 先にマージするPRが同じrepoにあり、そのrepoがmain以外のbaseを許すなら、このPRのbaseをそのPRのbranchにする（重ねたPR）。別のrepoのPRに頼るときや、baseをmainにする決まりのrepoでは、重ねずに順番だけを書く。どちらの場合も、ここに順番を書く。mainへ直接なら「mainへ直接」。 -->
 
 -
