@@ -1,0 +1,36 @@
+# Reusable check: the PR body fills every `## ` heading of pull_request_template.md (doc-gif/.github issue 2).
+# Each repo calls it with a few lines and pins one commit of this repo twice: in `uses:` (this workflow)
+# and in `with: ref:` (the checker and the template). A reusable workflow cannot read its own commit,
+# so the caller passes it. Reads only the pull_request event payload: no network, no secrets, no PR code.
+# The PR can change its caller, so a pass is not a review; the review checks the body too.
+name: check PR body
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Full commit SHA of doc-gif/.github to take the checker and the template from.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pr-body:
+    name: PR body
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require a full commit SHA
+        env:
+          REF: ${{ inputs.ref }}
+        run: '[[ "$REF" =~ ^[0-9a-f]{40}$ ]] || { echo "ref must be a 40-character commit SHA: $REF"; exit 1; }'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: doc-gif/.github
+          ref: ${{ inputs.ref }}
+          path: shared
+          persist-credentials: false
+      - run: node --version
+      - run: node shared/scripts/check-pr-body.mjs

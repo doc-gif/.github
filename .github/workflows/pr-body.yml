@@ -1,6 +1,5 @@
-# Checks that the PR body fills every heading of pull_request_template.md (doc-gif/.github issue 2).
-# Reads only the pull_request event payload: no network, no secrets. The PR can change this file and the
-# checker, so a pass is not a review; the review checks the body too.
+# Checks this repo's own PR bodies with the reusable check. github.sha is the PR merged into main, as checkout used before.
+# The PR can change both, so a pass is not a review; the review checks the body too.
 name: PR body
 
 on:
@@ -12,10 +11,6 @@ permissions:
 
 jobs:
   pr-body:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - run: node scripts/check-pr-body.mjs
+    uses: ./.github/workflows/check-pr-body.yml
+    with:
+      ref: ${{ github.sha }}
